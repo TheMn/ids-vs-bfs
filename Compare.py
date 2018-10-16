@@ -71,7 +71,7 @@ y1 = []
 y2 = []
 y3 = []
 
-for i in range(5):
+for i in range(number_of_tests):
     target = np.random.randint(0, number_of_nodes)
     print("\nthe target is: ", target)
     max_depth = 10
