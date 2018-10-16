@@ -1,60 +1,97 @@
 from collections import defaultdict
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 class Graph:
     def __init__(self, v):
         self.graph = defaultdict(list)
-        self.verts = v
+        self.vertices = v
+        self.bfs_result = 0
+        self.ids_result = 0
+        self.dls_result = 0
 
     def add_edge(self, u, v):
         self.graph[u].append(v)
 
-    def bfs(self, s):
-        chk = [False] * self.verts
+    def bfs(self, s, goal):
+        chk = [False] * self.vertices
         queue = [s]
         chk[s] = True
         while queue:
             s = queue.pop(0)
-            print("*", s)
+            if s == goal:
+                return True
+            self.bfs_result += 1
             for u in self.graph[s]:
                 if not chk[u]:
                     queue.append(u)
                     chk[u] = True
 
-    def dls(self, src, goal, maxDepth):
+    def dls(self, src, goal, max_depth, called_for_dls=True):
         if src == goal:
             return True
-        if maxDepth <= 0:
+        self.ids_result += 1
+        if called_for_dls:
+            self.dls_result += 1
+        if max_depth <= 0:
             return False
         for u in self.graph[src]:
-            if self.dls(u, goal, maxDepth - 1):
+            if self.dls(u, goal, max_depth - 1):
                 return True
         return False
 
-    def ids(self, src, goal, maxDepth):
-        for i in range(maxDepth):
-            if self.dls(src, goal, i):
+    def ids(self, src, goal, max_depth):
+        for i in range(max_depth):
+            if self.dls(src, goal, i, False):
                 return True
         return False
 
 
-g = Graph(7)
-g.add_edge(0, 1)
-g.add_edge(0, 2)
-g.add_edge(1, 3)
-g.add_edge(1, 4)
-g.add_edge(2, 5)
-g.add_edge(2, 6)
+number_of_nodes = np.random.randint(100, 200)
+nodes = np.arange(number_of_nodes)
 
-target = 6
-maxDepth = 3
+print(number_of_nodes)
+print(nodes)
+
+g = Graph(number_of_nodes)
+
+number_of_edges = np.random.randint(1000, 2000)
+for i in range(number_of_edges):
+    x = y = np.random.randint(number_of_nodes)
+    while y == x:
+        y = np.random.randint(number_of_nodes)
+    g.add_edge(x, y)
+
 src = 0
+number_of_tests = 5
+x = np.arange(number_of_tests)
+y1 = []
+y2 = []
+y3 = []
 
-g.bfs(0)
+for i in range(5):
+    target = np.random.randint(0, number_of_nodes)
+    print("\nthe target is: ", target)
+    max_depth = 10
 
-if g.ids(src, target, maxDepth):
-    print("Target is reachable from source " +
-          "within max depth")
-else:
-    print("Target is NOT reachable from source " +
-          "within max depth")
+    g.bfs_result = 0
+    g.ids_result = 0
+    g.dls_result = 0
+
+    g.bfs(src, target)
+    print(g.bfs_result, " => bfs result")
+    y1.append(g.bfs_result)
+
+    g.ids(src, target, max_depth)
+    print(g.ids_result, " => ids result")
+    y2.append(g.ids_result)
+
+    g.dls(src, target, max_depth)
+    print(g.dls_result, " => dls result")
+    y3.append(g.dls_result)
+
+plt.plot(x, y1, x, y2, x, y3)
+plt.legend(('bfs', 'ids', 'dls'), loc='upper left')
+plt.show()
